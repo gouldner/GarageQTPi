@@ -2,6 +2,7 @@ import os
 import binascii
 import yaml
 import paho.mqtt.client as mqtt
+import time, threading
 
 from lib.garage import GarageDoor
 
@@ -30,6 +31,8 @@ def execute_command(door, command):
         door.close()
     elif command == "STOP":
         door.stop()
+    elif command == "FORCE":
+        door.force()
     else:
         print "Invalid command: %s" % command
 
@@ -74,7 +77,11 @@ if __name__ == "__main__":
         door.onStateChange.addHandler(on_state_change)
 
         # Publish initial door state
-        client.publish(state_topic, door.state, retain=True)
+        def publish_current_status(state_topic=state_topic, door=door):
+            client.publish(state_topic, door.state, retain=True)
+            threading.Timer(60, publish_current_status).start()
+
+        publish_current_status(state_topic,door)
 
     # Main loop
     client.loop_forever()
