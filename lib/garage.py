@@ -48,6 +48,9 @@ class GarageDoor(object):
         if self.state == 'closed':
             self.__press()
 
+    def force(self):
+        self.__press()
+
     def close(self):
         if self.state == 'open':
             self.__press()
